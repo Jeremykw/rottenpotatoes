@@ -17,16 +17,12 @@ class MoviesController < ApplicationController
     # Create array @ratings of all checked ratings
     @ratings = params[:ratings]
     if @ratings != nil
-      @ratings = @ratings.keys
+      session[:ratings] = @ratings.keys
     end
 
-    # Load movie list
-    @order = params[:sort]
-    if @ratings != nil
-      @movies = Movie.where(:rating => @ratings).order(@order)
-    else
-      @movies = Movie.order(@order)
-    end
+    # Load movie list with @order and @rating filet
+    session[:order] = params[:sort]
+    @movies = Movie.where(:rating => session[:ratings]).order(session[:order])
   end
 
   def new
@@ -36,7 +32,7 @@ class MoviesController < ApplicationController
   def create
     @movie = Movie.create!(params[:movie])
     flash[:notice] = "#{@movie.title} was successfully created."
-    redirect_to movies_path
+    redirect_to movies_path(:sort => session[:order])
   end
 
   def edit
@@ -48,14 +44,14 @@ class MoviesController < ApplicationController
     @movie = Movie.find params[:id]
     @movie.update_attributes!(params[:movie])
     flash[:notice] = "#{@movie.title} was successfully updated."
-    redirect_to movie_path(@movie)
+    redirect_to movie_path(@movie), :sort => session[:order]
   end
 
   def destroy
     @movie = Movie.find(params[:id])
     @movie.destroy
     flash[:notice] = "Movie '#{@movie.title}' deleted."
-    redirect_to movies_path
+    redirect_to movies_path(:sort => session[:order])
   end
 
 end
