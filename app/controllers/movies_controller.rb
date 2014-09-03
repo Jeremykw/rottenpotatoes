@@ -7,17 +7,26 @@ class MoviesController < ApplicationController
   end
 
   def index
+    # Setup @all_ratings with array of all ratings in use in db
     @all_ratings ||= []
     Movie.all.each do |movie|
       @all_ratings << movie.rating
     end
     @all_ratings = @all_ratings.uniq
+
+    # Create array @ratings of all checked ratings
     @ratings = params[:ratings]
     if @ratings != nil
       @ratings = @ratings.keys
     end
+
+    # Load movie list
     @order = params[:sort]
-    @movies = Movie.order(@order)
+    if @ratings != nil
+      @movies = Movie.where(:rating => @ratings).order(@order)
+    else
+      @movies = Movie.order(@order)
+    end
   end
 
   def new
@@ -31,6 +40,7 @@ class MoviesController < ApplicationController
   end
 
   def edit
+    
     @movie = Movie.find params[:id]
   end
 
